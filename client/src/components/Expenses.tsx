@@ -9,7 +9,8 @@ import {
   Icon,
   Input,
   Image,
-  Loader
+  Loader,
+  Modal
 } from 'semantic-ui-react'
 
 import { createExpense, deleteExpense, getExpenses, patchExpense } from '../api/expenses-api'
@@ -26,7 +27,8 @@ interface ExpensesState {
   newExpenseName: string,
   date: string,
   amount: string,
-  loadingExpenses: boolean
+  loadingExpenses: boolean,
+  modalOpen: boolean,
 }
 
 export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> {
@@ -35,11 +37,16 @@ export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> 
     newExpenseName: '',
     date: '',
     amount: '',
-    loadingExpenses: true
+    loadingExpenses: true,
+    modalOpen: false,
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newExpenseName: event.target.value })
+  }
+
+  handleModalChange = (modalOpen: boolean) => {
+    this.setState({ modalOpen: modalOpen })
   }
 
   onEditButtonClick = (expenseId: string) => {
@@ -99,22 +106,30 @@ export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> 
   }
 
   renderCreateExpensesInput() {
+
     return (
       <Grid.Row>
         <Grid.Column width={16}>
-          <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'New Expense',
-              onClick: this.onExpenseCreate
-            }}
-            fluid
-            actionPosition="left"
-            placeholder="To change the world..."
-            onChange={this.handleNameChange}
-          />
+          <Modal
+            onClose={() => this.handleModalChange(false)}
+            onOpen={() => this.handleModalChange(true)}
+            open={this.state.modalOpen}
+            trigger={<Button>Create Expense</Button>}
+          >
+            <Modal.Header>Upload image</Modal.Header>
+            <Modal.Content image>
+              <Image size='medium' src='https://react.semantic-ui.com/images/wireframe/image-square.png' wrapped />
+              <Modal.Description>
+                <p>Would you like to upload this image?</p>
+              </Modal.Description>
+            </Modal.Content>
+            <Modal.Actions>
+              <Button onClick={() => this.handleModalChange(false)}>Cancel</Button>
+              <Button onClick={() => this.handleModalChange(false)} positive>
+                Ok
+              </Button>
+            </Modal.Actions>
+          </Modal>
         </Grid.Column>
         <Grid.Column width={16}>
           <Divider />
