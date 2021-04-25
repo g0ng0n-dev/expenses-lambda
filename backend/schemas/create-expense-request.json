@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "create-expense-request",
+  "type": "object",
+  "properties": {
+    "merchantName": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "boolean"
+    },
+    "attachmentUrl": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "merchantName",
+    "date",
+    "amount"
+  ],
+  "additionalProperties": false
+}
+
