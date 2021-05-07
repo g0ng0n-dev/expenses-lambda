@@ -5,14 +5,14 @@ import * as uuid from 'uuid';
 import deleteExpenseItemService from '../../services/deleteExpenseItemService';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 
-const logger = createLogger("HttpDeleteTodo");
+const logger = createLogger("HttpDeleteExpense");
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const eventId = uuid.v4()
   logger.debug(`start HttpDeleteExpense - ${eventId}`);
-  const todoId = event.pathParameters.todoId
+  const expenseId = event.pathParameters.expenseId
   const uid = getUserId(event);
-  await deleteExpenseItemService(uid, todoId);
+  await deleteExpenseItemService(uid, expenseId);
   logger.debug(`end HttpDeleteExpense - ${eventId}`);
 
   return {

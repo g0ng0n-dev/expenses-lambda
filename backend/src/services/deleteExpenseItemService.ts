@@ -3,9 +3,9 @@ import * as ddb from "../data/expense";
 import * as s3Svc from "../data/s3";
 import {createLogger} from "../utils/logger";
 
-const logger = createLogger("deleteTodoItemService");
+const logger = createLogger("deleteExpenseItemService");
 
-export default async function deleteTodoItemService(userId: string, expenseId: string)
+export default async function deleteExpenseItemService(userId: string, expenseId: string)
   : Promise<void> {
   logger.debug("start deleteExpenseItemService");
 
@@ -16,7 +16,7 @@ export default async function deleteTodoItemService(userId: string, expenseId: s
       await s3Svc.deleteAttachement(expenseId);
     }
 
-    // Delete TodoItem from DynamoDB
+    // Delete ExpenseItem from DynamoDB
     await ddb.deleteExpense(userId, expenseId);
   }
 

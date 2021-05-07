@@ -7,7 +7,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 import { createLogger } from '../../utils/logger';
 import * as uuid from 'uuid';
 
-const logger = createLogger("HttpCreateTodo");
+const logger = createLogger("HttpCreateExpense");
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent)
   : Promise<APIGatewayProxyResult> => {

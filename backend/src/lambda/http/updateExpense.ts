@@ -7,14 +7,14 @@ import { getUserId } from '../../utils/utils';
 import { ExpenseUpdate } from '../../models/ExpenseUpdate'
 import updateExpenseItemService from '../../services/updateExpenseItemService';
 
-const logger = createLogger("httpUpdateTodo");
+const logger = createLogger("httpUpdateExpense");
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   logger.debug("start httpUpdateExpense");
-  const todoId = event.pathParameters.todoId
+  const expenseId = event.pathParameters.expenseId
   const updatedExpenseItem: UpdateExpenseRequest = JSON.parse(event.body)
   const usedId = getUserId(event);
-  const response: ExpenseUpdate = await updateExpenseItemService(usedId, todoId, updatedExpenseItem);
+  const response: ExpenseUpdate = await updateExpenseItemService(usedId, expenseId, updatedExpenseItem);
   logger.debug(`end httpUpdateExpense`);
   return {
     statusCode: 200,
