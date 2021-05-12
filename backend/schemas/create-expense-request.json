@@ -10,7 +10,7 @@
       "type": "string"
     },
     "amount": {
-      "type": "boolean"
+      "type": "string"
     },
     "attachmentUrl": {
       "type": "string"

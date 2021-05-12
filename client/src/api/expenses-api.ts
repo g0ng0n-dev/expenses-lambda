@@ -15,6 +15,21 @@ export async function getExpenses(idToken: string): Promise<Expense[]> {
   })
   console.log('Expenses:', response.data)
   return response.data.items
+
+}
+
+export async function getExpense(idToken: string, expenseId: string): Promise<Expense> {
+
+
+  const response = await Axios.get(`${apiEndpoint}/expenses/${expenseId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    },
+  })
+  console.log('Expensee:', response.data)
+  return response.data.expense
+
 }
 
 export async function createExpense(
@@ -27,6 +42,7 @@ export async function createExpense(
       'Authorization': `Bearer ${idToken}`
     }
   })
+  console.log(response)
   return response.data.item
 }
 

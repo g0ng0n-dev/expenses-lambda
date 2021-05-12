@@ -13,36 +13,35 @@ import {
   Modal
 } from 'semantic-ui-react'
 
-import { createExpense, deleteExpense, getExpenses, patchExpense } from '../api/expenses-api'
+import { createExpense, deleteExpense, getExpenses, getUploadUrl, patchExpense, uploadFile } from '../api/expenses-api'
 import Auth from '../auth/Auth'
 import { Expense } from '../types/Expense'
+import { CreateExpense } from './CreateExpense'
 
 interface ExpensesProps {
   auth: Auth
   history: History
 }
 
+enum UploadState {
+  NoUpload,
+  FetchingPresignedUrl,
+  UploadingFile,
+}
+
 interface ExpensesState {
   expenses: Expense[]
-  newExpenseName: string,
-  date: string,
-  amount: string,
   loadingExpenses: boolean,
   modalOpen: boolean,
+  uploadState: UploadState
 }
 
 export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> {
   state: ExpensesState = {
     expenses: [],
-    newExpenseName: '',
-    date: '',
-    amount: '',
     loadingExpenses: true,
     modalOpen: false,
-  }
-
-  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newExpenseName: event.target.value })
+    uploadState: UploadState.NoUpload,
   }
 
   handleModalChange = (modalOpen: boolean) => {
@@ -52,19 +51,42 @@ export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> 
   onEditButtonClick = (expenseId: string) => {
     this.props.history.push(`/expenses/${expenseId}/edit`)
   }
+  setUploadState(uploadState: UploadState) {
+    this.setState({
+      uploadState
+    })
+  }
 
-  onExpenseCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onExpenseCreate = async (event: React.ChangeEvent<HTMLButtonElement>, merchantName: string, file: any, amount: string) => {
+    event.preventDefault()
+
     try {
       const date = this.calculateDueDate()
       const newExpense = await createExpense(this.props.auth.getIdToken(), {
-        merchantName: this.state.newExpenseName,
+        merchantName: merchantName,
         date: date,
-        amount: this.state.amount,
+        amount: amount,
       })
+
+      if (file) {
+        this.setUploadState(UploadState.FetchingPresignedUrl)
+        const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), newExpense.expenseId)
+
+        this.setUploadState(UploadState.UploadingFile)
+        await uploadFile(uploadUrl, file)
+        this.setUploadState(UploadState.NoUpload)
+
+        alert('File was uploaded!')
+      }else{
+        alert('No Expense Ticket on the Creation')
+      }
+
       this.setState({
         expenses: [...this.state.expenses, newExpense],
-        newExpenseName: ''
       })
+      if(this.state.uploadState === UploadState.NoUpload){
+        this.handleModalChange(false)
+      }
     } catch {
       alert('Expense creation failed')
     }
@@ -98,46 +120,20 @@ export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> 
       <div>
         <Header as="h1">Expenses</Header>
 
-        {this.renderCreateExpensesInput()}
+        <CreateExpense
+          auth={this.props.auth}
+          uploadState={this.state.uploadState}
+          handleSubmit={this.onExpenseCreate}
+          setUploadState={this.setUploadState}
+          modalOpen ={this.state.modalOpen}
+          handleModalChange={this.handleModalChange}
+          />
 
         {this.renderExpenses()}
       </div>
     )
   }
-
-  renderCreateExpensesInput() {
-
-    return (
-      <Grid.Row>
-        <Grid.Column width={16}>
-          <Modal
-            onClose={() => this.handleModalChange(false)}
-            onOpen={() => this.handleModalChange(true)}
-            open={this.state.modalOpen}
-            trigger={<Button>Create Expense</Button>}
-          >
-            <Modal.Header>Upload image</Modal.Header>
-            <Modal.Content image>
-              <Image size='medium' src='https://react.semantic-ui.com/images/wireframe/image-square.png' wrapped />
-              <Modal.Description>
-                <p>Would you like to upload this image?</p>
-              </Modal.Description>
-            </Modal.Content>
-            <Modal.Actions>
-              <Button onClick={() => this.handleModalChange(false)}>Cancel</Button>
-              <Button onClick={() => this.handleModalChange(false)} positive>
-                Ok
-              </Button>
-            </Modal.Actions>
-          </Modal>
-        </Grid.Column>
-        <Grid.Column width={16}>
-          <Divider />
-        </Grid.Column>
-      </Grid.Row>
-    )
-  }
-
+    
   renderExpenses() {
     if (this.state.loadingExpenses) {
       return this.renderLoading()
@@ -162,13 +158,13 @@ export class Expenses extends React.PureComponent<ExpensesProps, ExpensesState> 
         {this.state.expenses.map((expense, pos) => {
           return (
             <Grid.Row key={expense.expenseId}>
-              <Grid.Column width={1} verticalAlign="middle">
+              <Grid.Column width={3} verticalAlign="middle">
                 {expense.amount}
               </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
+              <Grid.Column width={7} verticalAlign="middle">
                 {expense.merchantName}
               </Grid.Column>
-              <Grid.Column width={3} floated="right">
+              <Grid.Column width={3} verticalAlign="middle">
                 {expense.date}
               </Grid.Column>
               <Grid.Column width={1} floated="right">

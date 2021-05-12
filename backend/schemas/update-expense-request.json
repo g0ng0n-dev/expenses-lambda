@@ -10,14 +10,14 @@
       "type": "string"
     },
     "amount": {
-      "type": "boolean"
+      "type": "string"
     },
     "attachmentUrl": {
       "type": "string"
     }
   },
   "required": [
-    "name",
+    "merchantName",
     "date",
     "amount"
   ],

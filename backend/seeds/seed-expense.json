@@ -2,14 +2,14 @@
   {
     "userId": "gmp-123",
     "merchantName": "amazon",
-    "todoId": "1111-1111-1111-1111",
+    "expenseId": "1111-1111-1111-1111",
     "date": "2020-06-12-23:59:59",
     "amount": "2"
   },
   {
     "userId": "gmp-456",
     "merchantName": "market",
-    "todoId": "1111-1111-1111-1112",
+    "expenseId": "1111-1111-1111-1112",
     "date": "2020-06-11-23:59:59",
     "amount": "2"
   }

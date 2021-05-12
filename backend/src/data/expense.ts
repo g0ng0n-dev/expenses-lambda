@@ -67,14 +67,16 @@ export async function updateExpense(userId: string, expenseId: string, upd: Expe
   await dbDocClient.update({
     TableName: tbl,
     Key: { userId: userId, expenseId: expenseId },
-    UpdateExpression: "set #merchantName=:nm, date=:dd, amount=:am",
+    UpdateExpression: "set #merchantName=:nm, #date=:dd, #amount=:am",
     ExpressionAttributeValues: {
       ":nm": upd.merchantName,
       ":dd": upd.date,
       ":am": upd.amount
     },
     ExpressionAttributeNames: {
-      "#name": "name"
+      "#merchantName": "merchantName",
+      "#date": "date",
+      "#amount": "amount",
     },
     ReturnValues: "UPDATED_NEW"
   }).promise();

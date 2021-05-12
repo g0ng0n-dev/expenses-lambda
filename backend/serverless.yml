@@ -58,7 +58,7 @@ custom:
       inMemory: true
       migrate: true
     seed:
-      Todo:
+      Expense:
         sources:
           - table: ${self:provider.environment.EXPENSES_TABLE}
             sources: './seeds/seed-expense.json'
@@ -89,7 +89,7 @@ functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  GetTodos:
+  GetExpenses:
     handler: src/lambda/http/getExpenses.handler
     events:
       - http:
@@ -117,7 +117,35 @@ functions:
           - xray:PutTelemetryRecords
         Resource: '*'
 
-  CreateTodo:
+  GetExpense:
+    handler: src/lambda/http/getExpense.handler
+    events:
+      - http:
+          method: get
+          path: expenses/{expenseId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.EXPENSES_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.EXPENSES_TABLE}/index/${self:provider.environment.EXPENSES_USER_INDEX}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
+        Resource: '*'
+
+  CreateExpense:
     handler: src/lambda/http/createExpense.handler
     events:
       - http:
@@ -130,7 +158,7 @@ functions:
             schema:
               application/json: ${file(schemas/create-expense-request.json)}
 
-  UpdateTodo:
+  UpdateExpense:
     handler: src/lambda/http/updateExpense.handler
     events:
       - http:
@@ -150,7 +178,7 @@ functions:
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.EXPENSES_TABLE}
 
-  DeleteTodo:
+  DeleteExpense:
     handler: src/lambda/http/deleteExpense.handler
     events:
       - http:
@@ -193,8 +221,8 @@ resources:
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PATCH'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
@@ -208,7 +236,7 @@ resources:
         ValidateRequestBody: true
         ValidateRequestParameters: false
 
-    TodosTable:
+    ExpensesTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
@@ -216,16 +244,12 @@ resources:
             AttributeType: S
           - AttributeName: expenseId
             AttributeType: S
-          - AttributeName: merchantName
-            AttributeType: S
-          - AttributeName: amount
-            AttributeType: S
           - AttributeName: date
             AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-          - AttributeName: todoId
+          - AttributeName: expenseId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.EXPENSES_TABLE}
